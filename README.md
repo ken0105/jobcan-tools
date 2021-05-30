@@ -2,11 +2,6 @@
 * Set USER_ID and USER_PASS to .env
 * Change the value to be selected in the select box
 
-### run
-```
-yarn start
-```
-
 ### 打刻
 ```
 yarn punch
