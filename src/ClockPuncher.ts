@@ -23,7 +23,7 @@ export default class ClockPuncher extends BaseRunner {
     await page.click('#menu_adit > a:nth-child(1)')
     await page.waitForNavigation()
 
-    const now = dayjs().utc().local().format('hhmm')
+    const now = dayjs().utc().local().format('HHmm')
     await page.type(`input[name="time"]`, now)
     await page.select(`select[name="group_id"]`, '5')
     // ここをアンコメントすると打刻されます
