@@ -23,11 +23,11 @@ export default class ClockPuncher extends BaseRunner {
     await page.click('#menu_adit > a:nth-child(1)')
     await page.waitForNavigation()
 
-    const now = dayjs().utc().local().format('hh:mm')
+    const now = dayjs().utc().local().format('hhmm')
     await page.type(`input[name="time"]`, now)
     await page.select(`select[name="group_id"]`, '5')
-    // ここをコメントオンすると打刻されます
-    // await page.click("#insert_button");
+    // ここをアンコメントすると打刻されます
+    // await page.click("#insert_button")
     console.log(`打刻した時間は ${now} です。`)
     await sleep(3000)
   }
