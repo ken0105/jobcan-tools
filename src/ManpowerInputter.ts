@@ -3,6 +3,8 @@ import { BaseRunner } from './BaseRunner'
 import { login } from './login'
 import { sleep } from './sleep'
 
+const registeredTime = 2
+
 export default class ManpowerInputter extends BaseRunner {
   protected async exec(browser: Browser, page: Page) {
     await login(page)
@@ -23,6 +25,7 @@ export default class ManpowerInputter extends BaseRunner {
     const tableRows = (await page.$$('#search-result > table > tbody > tr')).length
     let currentRow = 0
     while (currentRow < tableRows) {
+      let modalRegisteredRows = 0
       currentRow++
       console.log(`day ${currentRow} is processing`)
       let ele = await page.$(`#search-result > table > tbody > tr:nth-child(${currentRow}) > td:nth-child(3) > span`)
@@ -32,16 +35,22 @@ export default class ManpowerInputter extends BaseRunner {
         continue
       }
       ele = await page.$(`#search-result > table > tbody > tr:nth-child(${currentRow}) > td:nth-child(2)`)
-      const workHour = await page.evaluate(elm => elm.textContent, ele)
+      let totalWorkHour = await page.evaluate(elm => elm.textContent, ele)
+      if (isWorkday(totalWorkHour)) {
+        totalWorkHour = totalWorkHour.split(":")[0] - registeredTime + ":" + totalWorkHour.split(":")[1]
+      }
 
-      console.log(workHour)
       await page.click(`#search-result > table > tbody > tr:nth-child(${currentRow}) > td:nth-child(4) > div`)
-      await sleep(1000)
-      await page.click(`#edit-menu-contents > table > tbody > tr > td:nth-child(5) > span`)
-      await page.select(`select[name="projects[]"]`, '27')
-      await page.select(`select[name="tasks[]"]`, '2')
-      await page.select(`select[name="tasks[]"]`, '2')
-      await page.type(`input[name="minutes[]"`, workHour)
+      await sleep(1000);
+      if (isWorkday(totalWorkHour)) {
+        await page.select(`select[name="template"]`, '1')
+        modalRegisteredRows += 2
+      }
+      await sleep(200)
+      await page.click(`#edit-menu-contents > table > tbody > tr:nth-child(1) > td:nth-child(5) > span`)
+      await page.select(`#edit-menu-contents > table > tbody > tr:nth-child(${modalRegisteredRows + 2}) > td:nth-child(2) > select`, '27')
+      await page.select(`#edit-menu-contents > table > tbody > tr:nth-child(${modalRegisteredRows + 2}) > td:nth-child(3) > select`, '2')
+      await page.type(`#edit-menu-contents > table > tbody > tr:nth-child(${modalRegisteredRows + 2}) > td:nth-child(4) > input.form-control.jbc-form-control.form-control-sm.man-hour-input`, totalWorkHour)
       await clickSave(page)
       await sleep(2000)
       console.log('saved')
@@ -49,6 +58,9 @@ export default class ManpowerInputter extends BaseRunner {
     console.log('finished')
   }
 }
+
+function isWorkday(workHour: String): Boolean { return workHour != "00:00" }
+
 
 ;(async () => {
   const runner = new ManpowerInputter()
