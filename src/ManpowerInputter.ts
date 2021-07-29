@@ -2,9 +2,8 @@ import { Browser, Page } from 'puppeteer'
 import { BaseRunner } from './BaseRunner'
 import { login } from './login'
 import { sleep } from './sleep'
-import dayjs from "dayjs"
+import dayjs from 'dayjs'
 const env = process.env
-
 
 class ManpowerInputter extends BaseRunner {
   protected async exec(browser: Browser, page: Page) {
@@ -17,21 +16,21 @@ class ManpowerInputter extends BaseRunner {
     let easyInputSettingRecords = 0
     let mainProjectOptionValue = 0
     if (enableEasyInputSetting) {
-        easyInputSettingTimeHours = Number(env.EASY_INPUT_SETTING_TIME_HOURS)
-        easyInputSettingTimeMinutes = Number(env.EASY_INPUT_SETTING_TIME_MINUTES)
-        easyInputSettingRecords = Number(env.EASY_INPUT_SETTING_RECORDS)
-        if(isNaN(easyInputSettingTimeHours) || isNaN(easyInputSettingTimeMinutes) || !easyInputSettingRecords){
-            console.error("環境変数不正")
-            return
-        }
+      easyInputSettingTimeHours = Number(env.EASY_INPUT_SETTING_TIME_HOURS)
+      easyInputSettingTimeMinutes = Number(env.EASY_INPUT_SETTING_TIME_MINUTES)
+      easyInputSettingRecords = Number(env.EASY_INPUT_SETTING_RECORDS)
+      if (isNaN(easyInputSettingTimeHours) || isNaN(easyInputSettingTimeMinutes) || !easyInputSettingRecords) {
+        console.error('環境変数不正')
+        return
+      }
     }
     mainProjectOptionValue = Number(env.MAIN_PROJRCT_OPTION_VALUE)
-    if (!mainProjectOptionValue){
-        console.error("環境変数不正")
-        return
+    if (!mainProjectOptionValue) {
+      console.error('環境変数不正')
+      return
     }
 
-    await login(page);
+    await login(page)
     await sleep(1000)
     const [newPage] = await Promise.all([
       browser.waitForTarget(t => t.opener() === page.target()).then(t => t.page()),
@@ -46,8 +45,8 @@ class ManpowerInputter extends BaseRunner {
     await page.click('#menu_man_hour_manage > a:nth-child(1)')
     await page.waitForNavigation()
 
-    if(enablePreviousMonthInput){
-        await goBackPreviousMonth(page)
+    if (enablePreviousMonthInput) {
+      await goBackPreviousMonth(page)
     }
 
     const tableRows = (await page.$$('#search-result > table > tbody > tr')).length
@@ -63,9 +62,9 @@ class ManpowerInputter extends BaseRunner {
         continue
       }
       ele = await page.$(`#search-result > table > tbody > tr:nth-child(${currentRow}) > td:nth-child(2)`)
-      let totalWorkHour = await page.evaluate(elm => elm.textContent, ele);
+      let totalWorkHour = await page.evaluate(elm => elm.textContent, ele)
       if (isWorkday(totalWorkHour)) {
-          totalWorkHour = subtractHHMM(totalWorkHour, easyInputSettingTimeHours, easyInputSettingTimeMinutes)
+        totalWorkHour = subtractHHMM(totalWorkHour, easyInputSettingTimeHours, easyInputSettingTimeMinutes)
       }
       await page.click(`#search-result > table > tbody > tr:nth-child(${currentRow}) > td:nth-child(4) > div`)
       await sleep(1000)
@@ -76,13 +75,24 @@ class ManpowerInputter extends BaseRunner {
       }
       await sleep(200)
       await page.click(`#edit-menu-contents > table > tbody > tr:nth-child(1) > td:nth-child(5) > span`)
-      await page.select(`#edit-menu-contents > table > tbody > tr:nth-child(${paddingRecords + 2}) > td:nth-child(2) > select`, String(mainProjectOptionValue))
-      await page.select(`#edit-menu-contents > table > tbody > tr:nth-child(${paddingRecords + 2}) > td:nth-child(3) > select`, '2')
-      await page.type(`#edit-menu-contents > table > tbody > tr:nth-child(${paddingRecords + 2}) > td:nth-child(4) > input.form-control.jbc-form-control.form-control-sm.man-hour-input`, totalWorkHour)
+      await page.select(
+        `#edit-menu-contents > table > tbody > tr:nth-child(${paddingRecords + 2}) > td:nth-child(2) > select`,
+        String(mainProjectOptionValue),
+      )
+      await page.select(
+        `#edit-menu-contents > table > tbody > tr:nth-child(${paddingRecords + 2}) > td:nth-child(3) > select`,
+        '2',
+      )
+      await page.type(
+        `#edit-menu-contents > table > tbody > tr:nth-child(${
+          paddingRecords + 2
+        }) > td:nth-child(4) > input.form-control.jbc-form-control.form-control-sm.man-hour-input`,
+        totalWorkHour,
+      )
       await clickSave(page)
       await sleep(2000)
       console.log('saved')
-      if(enablePreviousMonthInput){
+      if (enablePreviousMonthInput) {
         await goBackPreviousMonth(page)
       }
     }
@@ -90,8 +100,9 @@ class ManpowerInputter extends BaseRunner {
   }
 }
 
-function isWorkday(workHour: String): Boolean { return workHour != "00:00" }
-
+function isWorkday(workHour: String): Boolean {
+  return workHour != '00:00'
+}
 
 ;(async () => {
   const runner = new ManpowerInputter()
@@ -109,16 +120,16 @@ async function clickSave(page: Page) {
 }
 
 async function goBackPreviousMonth(p: Page) {
-    const targetMonth = dayjs().month();
-    await p.select(`select[name="month"]`, targetMonth.toString());
-    await sleep(1000)
+  const targetMonth = dayjs().month()
+  await p.select(`select[name="month"]`, targetMonth.toString())
+  await sleep(1000)
 }
 
 function subtractHHMM(base: String, hour: number, minute: number): String {
-    let d = dayjs()
-    d = d.hour(Number(base.split(":")[0]))
-    d = d.minute(Number(base.split(":")[1]))
-    d = d.subtract(hour, 'hour')
-    d = d.subtract(minute, 'minute')
-    return d.hour() + ":" + d.minute()
+  let d = dayjs()
+  d = d.hour(Number(base.split(':')[0]))
+  d = d.minute(Number(base.split(':')[1]))
+  d = d.subtract(hour, 'hour')
+  d = d.subtract(minute, 'minute')
+  return d.hour() + ':' + d.minute()
 }
