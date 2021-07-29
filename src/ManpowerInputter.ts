@@ -6,7 +6,7 @@ import dayjs from "dayjs"
 const env = process.env
 
 
-export default class ManpowerInputter extends BaseRunner {
+class ManpowerInputter extends BaseRunner {
   protected async exec(browser: Browser, page: Page) {
     // @ts-ignore
     let enableEasyInputSetting = Boolean(JSON.parse(env.ENABLE_EASY_INPUT_SETTING))
