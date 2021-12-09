@@ -56,8 +56,17 @@ class ManpowerInputter extends BaseRunner {
       currentRow++
       console.log(`day ${currentRow} is processing`)
       let ele = await page.$(`#search-result > table > tbody > tr:nth-child(${currentRow}) > td:nth-child(3) > span`)
-      // eleがnullなら入力済
+      // eleがnullなら入力済      
       if (ele == null) {
+        console.log(`day ${currentRow} is skipped`)
+        continue
+      }
+      // 労働時間0の場合はスキップ
+      let workTime = await page.$eval(`#search-result > table > tbody > tr:nth-child(${currentRow}) > td:nth-child(2)`, item => {
+        return item.textContent;
+      })
+      console.log(`worktime ${workTime}`)
+      if (workTime === "00:00") {
         console.log(`day ${currentRow} is skipped`)
         continue
       }
@@ -70,7 +79,7 @@ class ManpowerInputter extends BaseRunner {
       await sleep(1000)
       let paddingRecords = 0
       if (isWorkday(totalWorkHour) && enableEasyInputSetting) {
-        await page.select(`select[name="template"]`, '1')
+        await page.select(`select[name="template"]`, '2')
         paddingRecords = easyInputSettingRecords
       }
       await sleep(200)
