@@ -11,11 +11,13 @@ class ManpowerInputter extends BaseRunner {
     let enableEasyInputSetting = Boolean(JSON.parse(env.ENABLE_EASY_INPUT_SETTING))
     // @ts-ignore
     let enablePreviousMonthInput = Boolean(JSON.parse(env.ENABLE_PREVIOUS_MONTH_INPUT))
+    let easyInputOptionValue = "1"
     let easyInputSettingTimeHours = 0
     let easyInputSettingTimeMinutes = 0
     let easyInputSettingRecords = 0
     let mainProjectOptionValue = 0
     if (enableEasyInputSetting) {
+      easyInputOptionValue = isNaN(Number(env.EASY_INPUT_OPTION_VALUE)) ? "1" : Number(env.EASY_INPUT_OPTION_VALUE).toString()
       easyInputSettingTimeHours = Number(env.EASY_INPUT_SETTING_TIME_HOURS)
       easyInputSettingTimeMinutes = Number(env.EASY_INPUT_SETTING_TIME_MINUTES)
       easyInputSettingRecords = Number(env.EASY_INPUT_SETTING_RECORDS)
@@ -79,7 +81,7 @@ class ManpowerInputter extends BaseRunner {
       await sleep(1000)
       let paddingRecords = 0
       if (isWorkday(totalWorkHour) && enableEasyInputSetting) {
-        await page.select(`select[name="template"]`, '2')
+        await page.select(`select[name="template"]`, easyInputOptionValue)
         paddingRecords = easyInputSettingRecords
       }
       await sleep(200)
