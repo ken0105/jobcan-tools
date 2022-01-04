@@ -121,7 +121,13 @@ async function clickSave(page: Page) {
 
 async function goBackPreviousMonth(p: Page) {
   const targetMonth = dayjs().month()
-  await p.select(`select[name="month"]`, targetMonth.toString())
+  if(targetMonth == 0) {
+    await p.select(`select[name="year"]`, String(dayjs().year() - 1))
+    await sleep(1000)
+    await p.select(`select[name="month"]`, "12")
+  } else {
+    await p.select(`select[name="month"]`, targetMonth.toString())
+  }
   await sleep(1000)
 }
 
