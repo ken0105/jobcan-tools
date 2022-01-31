@@ -16,6 +16,7 @@ class ManpowerInputter extends BaseRunner {
     let easyInputSettingTimeMinutes = 0
     let easyInputSettingRecords = 0
     let mainProjectOptionValue = 0
+    let mainProjectOptionTaskValue = 0
     if (enableEasyInputSetting) {
       easyInputOptionValue = isNaN(Number(env.EASY_INPUT_OPTION_VALUE)) ? "1" : Number(env.EASY_INPUT_OPTION_VALUE).toString()
       easyInputSettingTimeHours = Number(env.EASY_INPUT_SETTING_TIME_HOURS)
@@ -26,8 +27,13 @@ class ManpowerInputter extends BaseRunner {
         return
       }
     }
-    mainProjectOptionValue = Number(env.MAIN_PROJRCT_OPTION_VALUE)
+    mainProjectOptionValue = Number(env.MAIN_PROJECT_OPTION_VALUE)
     if (!mainProjectOptionValue) {
+      console.error('環境変数不正')
+      return
+    }
+    mainProjectOptionTaskValue = Number(env.MAIN_PROJECT_OPTION_TASK_VALUE)
+    if (!mainProjectOptionTaskValue) {
       console.error('環境変数不正')
       return
     }
@@ -92,7 +98,7 @@ class ManpowerInputter extends BaseRunner {
       )
       await page.select(
         `#edit-menu-contents > table > tbody > tr:nth-child(${paddingRecords + 2}) > td:nth-child(3) > select`,
-        '2',
+        String(mainProjectOptionTaskValue),
       )
       await page.type(
         `#edit-menu-contents > table > tbody > tr:nth-child(${
