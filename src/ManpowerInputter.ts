@@ -42,7 +42,7 @@ class ManpowerInputter extends BaseRunner {
     await sleep(1000)
     const [newPage] = await Promise.all([
       browser.waitForTarget(t => t.opener() === page.target()).then(t => t.page()),
-      page.click('#jbc-app-links > ul > li:nth-child(2) > a'),
+      page.click('#jbc-app-links > ul > li:nth-child(3) > a'),
     ])
 
     await newPage!.waitForSelector('body > header > div.jbcid-header > nav > div.jbcid-navbar-header > a', {
